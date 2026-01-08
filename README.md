@@ -108,8 +108,7 @@ ikshanam/
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # Project documentation
 ├── .env                            # Environment variables (API keys)
-├── .gitignore                      # Git ignore rules
-└── outputs/                        # Generated videos (gitignored)
+└── .gitignore                      # Git ignore rules
 ```
 
 ---
