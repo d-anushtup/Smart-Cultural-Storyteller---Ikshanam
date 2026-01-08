@@ -160,7 +160,7 @@ This project is for educational purposes only.
 - [Groq](https://groq.com) for lightning-fast AI inference
 - [Streamlit](https://streamlit.io) for the amazing framework
 - [Microsoft Edge TTS](https://github.com/rany2/edge-tts) for neural voices
-- Inspired by storytelling traditions from around the world 🌏
+- Inspired by storytelling traditions from around the world
 
 ---
 
