@@ -73,7 +73,7 @@ except ImportError:
 # Page config
 st.set_page_config(
     page_title="Ikshanam - A Smart Cultural Storyteller", 
-    page_icon="🌍",
+    page_icon="Ikshanam.png",
     layout="centered"
 )
 
@@ -409,39 +409,70 @@ NARRATION_VOICES = {
     "Christopher (US, News)": "en-US-ChristopherNeural",
 }
 
+# Language-specific voices for Edge TTS (used when story is in non-English language)
+LANGUAGE_VOICES = {
+    "bengali": ("bn-IN-TanishaaNeural", "bn"),
+    "hindi": ("hi-IN-SwaraNeural", "hi"),
+    "tamil": ("ta-IN-PallaviNeural", "ta"),
+    "telugu": ("te-IN-ShrutiNeural", "te"),
+    "marathi": ("mr-IN-AarohiNeural", "mr"),
+    "gujarati": ("gu-IN-DhwaniNeural", "gu"),
+    "kannada": ("kn-IN-SapnaNeural", "kn"),
+    "malayalam": ("ml-IN-SobhanaNeural", "ml"),
+    "punjabi": ("pa-IN-VaaniNeural", "pa"),
+    "odia": ("or-IN-SubhasiniNeural", "or"),  
+    "assamese": ("as-IN-YashicaNeural", "as"),
+    "spanish": ("es-ES-ElviraNeural", "es"),
+    "french": ("fr-FR-DeniseNeural", "fr"),
+    "german": ("de-DE-KatjaNeural", "de"),
+    "italian": ("it-IT-ElsaNeural", "it"),
+    "japanese": ("ja-JP-NanamiNeural", "ja"),
+    "chinese": ("zh-CN-XiaoxiaoNeural", "zh-CN"),
+    "arabic": ("ar-SA-ZariyahNeural", "ar"),
+    "korean": ("ko-KR-SunHiNeural", "ko"),
+    "portuguese": ("pt-BR-FranciscaNeural", "pt"),
+    "russian": ("ru-RU-SvetlanaNeural", "ru"),
+    "turkish": ("tr-TR-EmelNeural", "tr"),
+    "dutch": ("nl-NL-ColetteNeural", "nl"),
+    "polish": ("pl-PL-AgnieszkaNeural", "pl"),
+    "swedish": ("sv-SE-SofieNeural", "sv"),
+    "greek": ("el-GR-AthinaNeural", "el"),
+    "english": ("en-US-JennyNeural", "en"),
+}
+
 # Sidebar for inputs
-st.sidebar.header("✨ Create Your Story")
+st.sidebar.header("Create Your Story")
 
 # Custom prompt
 custom_prompt = st.sidebar.text_area(
-    "💡 Custom Prompt", 
-    placeholder="Add any specific elements you want in the story..."
+    "Custom Prompt", 
+    placeholder="Enter your thoughts..."
 )
 
 # Culture selection with custom option
 culture_options = list(CULTURES.keys()) + ["Other (type below)"]
-culture_choice = st.sidebar.selectbox("🌍 Choose Culture", culture_options)
+culture_choice = st.sidebar.selectbox("Choose Culture", culture_options)
 if culture_choice == "Other (type below)":
     culture = st.sidebar.text_input("Enter culture:", placeholder="e.g., Korean, Persian, Slavic...")
 else:
     culture = culture_choice
 
 # Story Type selection with custom option
-story_type_choice = st.sidebar.selectbox("📖 Story Type", STORY_TYPES)
+story_type_choice = st.sidebar.selectbox("Choose Story Type", STORY_TYPES)
 if story_type_choice == "Other (type below)":
     story_type = st.sidebar.text_input("Enter story type:", placeholder="e.g., Fable, Parable, Epic...")
 else:
     story_type = story_type_choice
 
 # Tone selection with custom option
-tone_choice = st.sidebar.selectbox("🎭 Tone", TONES)
+tone_choice = st.sidebar.selectbox("Choose Tone", TONES)
 if tone_choice == "Other (type below)":
     tone = st.sidebar.text_input("Enter tone:", placeholder="e.g., Romantic, Philosophical, Adventurous...")
 else:
     tone = tone_choice
 
 # Language selection
-language_choice = st.sidebar.selectbox("🗣️ Story Language", LANGUAGES, index=0)
+language_choice = st.sidebar.selectbox("Choose Story Language", LANGUAGES, index=0)
 if language_choice == "Other (type below)":
     story_language = st.sidebar.text_input("Enter language:", placeholder="e.g., Odia, Nepali, Portuguese...")
 else:
@@ -530,16 +561,16 @@ def generate_story(culture_name, story_type, tone, language="English", custom_pr
         
         factual_instruction = f"""
 
-📚 **CRITICAL - {story_type_name} ACCURACY REQUIREMENT**:
+**CRITICAL - {story_type_name} ACCURACY REQUIREMENT**:
 Since this is a {story_type_name} story, you MUST follow these strict guidelines:
 
-⚠️ DO NOT HALLUCINATE OR INVENT:
+DO NOT HALLUCINATE OR INVENT:
 - DO NOT create fictional characters, events, or places
 - DO NOT invent dialogues or scenes that contradict historical/mythological records
 - DO NOT modify established facts, relationships, timelines, or outcomes
 - DO NOT mix different mythologies or historical periods incorrectly
 
-✅ YOU MUST:
+YOU MUST:
 - Base the story on REAL, well-documented figures and events (e.g., {examples})
 - Use ACCURATE names, dates, relationships, and facts as recorded in authentic sources
 - Follow the ACTUAL narrative as it exists in traditional texts and historical records
@@ -547,25 +578,25 @@ Since this is a {story_type_name} story, you MUST follow these strict guidelines
 - If adding descriptive detail (weather, emotions), ensure it doesn't contradict known facts
 - Cite the source tradition if relevant (e.g., "from the Mahabharata", "according to Greek tradition")
 
-📖 This is a FAITHFUL RETELLING with beautiful language - NOT a creative reimagining."""
+This is a FAITHFUL RETELLING with beautiful language - NOT a creative reimagining."""
     
     prompt = f"""You are a legendary storyteller, the kind whose voice makes listeners forget time itself. Your tales have been passed down through generations because they touch the soul.{language_instruction}{factual_instruction}
 
 CREATE A UNIQUE {story_type.upper()} from {culture_short} culture that will make the reader FEEL deeply.
 
-🎭 TONE: {tone}
+TONE: {tone}
 {tone_guide}
 
-🌍 CULTURAL SOUL:
+CULTURAL SOUL:
 {culture_context}
 
-🎲 THIS STORY'S UNIQUE ELEMENTS:
+THIS STORY'S UNIQUE ELEMENTS:
 - Central theme: {chosen_seed}
 - Emotional journey: {chosen_emotion}
 - Sensory focus: {sensory_focus}
 {f'- Special request: {custom_prompt}' if custom_prompt else ''}
 
-📝 STORYTELLING REQUIREMENTS:
+STORYTELLING REQUIREMENTS:
 
 1. **EMOTIONAL DEPTH**: Make the reader's heart race, ache, or soar. Show characters' inner struggles. Use the emotional journey of "{chosen_emotion}" as an undercurrent.
 
@@ -800,35 +831,37 @@ def analyze_story_mood(text):
     return "neutral"
 
 # Generate audio function with natural neural voices
-def generate_audio(text, output_path, voice_id=None):
+def generate_audio(text, output_path, voice_id=None, language=None):
     """Generate audio using Edge TTS (Microsoft neural voices) or gTTS fallback.
     
     Args:
         text: The text to convert to speech
         output_path: Path to save the audio file
-        voice_id: Specific voice ID to use (e.g., 'en-US-JennyNeural')
+        voice_id: Specific voice ID to use (e.g., 'en-US-JennyNeural') - only used for English
+        language: The language of the text (e.g., 'bengali', 'hindi') - overrides voice_id for non-English
     """
+    
+    # Determine the correct voice based on language
+    lang_lower = (language or "english").lower().strip()
+    gtts_lang = "en"  # Default for gTTS fallback
+    
+    # Check if we have a language-specific voice
+    if lang_lower in LANGUAGE_VOICES and lang_lower != "english":
+        # Use language-specific voice for non-English stories
+        voice = LANGUAGE_VOICES[lang_lower][0]
+        gtts_lang = LANGUAGE_VOICES[lang_lower][1]
+    elif voice_id:
+        # Use provided voice for English
+        voice = voice_id
+    else:
+        # Default English voice
+        voice = "en-US-JennyNeural"
+    
+    rate = "+0%"
     
     # Try Edge TTS first (much more natural sounding)
     if EDGE_TTS_AVAILABLE:
         try:
-            # Use provided voice or default based on mood
-            if voice_id:
-                voice = voice_id
-                rate = "+0%"
-            else:
-                # Analyze mood for voice selection (fallback)
-                mood = analyze_story_mood(text)
-                if mood == "positive":
-                    voice = "en-US-AriaNeural"
-                    rate = "+5%"
-                elif mood == "dramatic":
-                    voice = "en-GB-SoniaNeural"
-                    rate = "-10%"
-                else:
-                    voice = "en-US-JennyNeural"
-                    rate = "+0%"
-            
             # Create async function for edge-tts
             async def generate():
                 communicate = edge_tts.Communicate(text, voice, rate=rate)
@@ -844,20 +877,21 @@ def generate_audio(text, output_path, voice_id=None):
     
     # Fallback to gTTS
     try:
-        tts = gTTS(text=text, lang='en', slow=False)
+        tts = gTTS(text=text, lang=gtts_lang, slow=False)
         tts.save(output_path)
         return output_path, None
     except Exception as e:
         return None, str(e)
 
 # Generate video function with FFmpeg for high quality
-def generate_video(story_data, output_dir, voice_id=None):
+def generate_video(story_data, output_dir, voice_id=None, language=None):
     """Generate a high-quality story video using FFmpeg with transitions.
     
     Args:
         story_data: dict with title, story, etc.
         output_dir: directory to save output files
         voice_id: optional voice ID for narration
+        language: optional language for narration (e.g., 'bengali', 'hindi')
     """
     
     title = story_data['title']
@@ -877,9 +911,9 @@ def generate_video(story_data, output_dir, voice_id=None):
         temp_dir = Path(output_dir)
         temp_dir.mkdir(exist_ok=True)
         
-        # Generate audio first with selected voice
+        # Generate audio first with selected voice and language
         audio_path = temp_dir / "narration.mp3"
-        generate_audio(story, str(audio_path), voice_id=voice_id)
+        generate_audio(story, str(audio_path), voice_id=voice_id, language=language)
         
         # Get audio duration - try multiple methods
         audio_duration = 30  # Default fallback
@@ -913,14 +947,14 @@ def generate_video(story_data, output_dir, voice_id=None):
         import time
         scene_seed = int(time.time() * 1000)
         
-        # Create visual prompt based on the story title and culture
-        visual_prompt = f"Cinematic illustration for '{title}'. {culture_short} cultural style, beautiful scenery, dramatic lighting, fantasy art, painterly style, no text, 4k quality"
+        # Create visual prompt for video, based on the story title and culture
+        visual_prompt = f"Artistic and Cinematic illustration for '{title}'. Should be of {culture_short} cultural style, with beautiful scenery, dramatic lighting, fantasy art, painterly style, no text, 4k quality"
         encoded_prompt = urllib.parse.quote(visual_prompt)
         
-        # Fetch AI-generated image from Pollinations.ai (single attempt)
+        # Fetch AI-generated image from Pollinations.ai
         img_loaded = False
         try:
-            img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=854&height=480&nologo=true&seed={scene_seed}"
+            img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={scene_seed}"
             response = requests.get(img_url, timeout=60)
             
             if response.status_code == 200 and len(response.content) > 1000:
@@ -1006,7 +1040,6 @@ def generate_video(story_data, output_dir, voice_id=None):
                 srt_file.write(f"{sentence}\n\n")
         
         video_path = temp_dir / "story_video.mp4"
-        temp_video = temp_dir / "temp_video.mp4"
         
         # Try Movis first for best quality with animations
         if MOVIS_AVAILABLE:
@@ -1087,7 +1120,6 @@ def generate_video(story_data, output_dir, voice_id=None):
         
         # Fallback to imageio
         if IMAGEIO_AVAILABLE:
-            fps = max(1, int(24 / scene_duration)) if scene_duration > 0 else 24
             video_path = temp_dir / "story_video.mp4"
             writer = imageio.get_writer(str(video_path), fps=24)
             
@@ -1125,13 +1157,13 @@ if 'show_captions' not in st.session_state:
     st.session_state['show_captions'] = True
 
 # Main generate button
-if st.sidebar.button("🎬 Generate Story", type="primary", use_container_width=True):
-    with st.spinner("✨ Weaving your cultural tale..."):
+if st.sidebar.button("Generate Story", type="primary", use_container_width=True):
+    with st.spinner("Weaving your cultural tale..."):
         # Always generate story in English first
         story_text, error = generate_story(culture, story_type, tone, "English", custom_prompt)
         
         if error:
-            st.error(f"❌ Error generating story: {error}")
+            st.error(f"Error generating story: {error}")
         else:
             # Parse the English story
             parsed_story = parse_story(story_text)
@@ -1203,7 +1235,7 @@ if st.sidebar.button("🎬 Generate Story", type="primary", use_container_width=
             unique_seed = int(time.time() * 1000)
             culture_short = culture.split(' ', 1)[1] if ' ' in culture else culture
             random_style = random.choice(["watercolor", "oil painting", "digital art", "fantasy art", "illustration", "concept art"])
-            img_prompt = f"Beautiful {random_style} for story '{parsed_story['title']}', {culture_short} cultural theme, mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
+            img_prompt = f"Beautiful {random_style} image for story '{parsed_story['title']}', on {culture_short} cultural theme, with mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
             encoded_prompt = urllib.parse.quote(img_prompt)
             
             # Server-side fetch with timeout
@@ -1264,7 +1296,7 @@ if st.session_state.get('story_data'):
     """, unsafe_allow_html=True)
     
     # Title with custom styling
-    st.markdown(f'<h2 class="story-title">📜 {data["title"]}</h2>', unsafe_allow_html=True)
+    st.markdown(f'<h2 class="story-title">{data["title"]}</h2>', unsafe_allow_html=True)
     st.markdown(f'<p class="story-meta">{current_culture} • {current_type} • {current_tone}</p>', unsafe_allow_html=True)
     
     # Display background image if available
@@ -1325,95 +1357,17 @@ if st.session_state.get('story_data'):
         
         st.markdown(f"""
         <div class="moral-box">
-            <strong>✨ {moral_label}:</strong> {data['moral']}
+            <strong> {moral_label}:</strong> {data['moral']}
         </div>
         """, unsafe_allow_html=True)
     
     st.divider()
     
-    # Generate Image section
-    st.markdown('<h3 class="media-header">🖼️ Generate Image</h3>', unsafe_allow_html=True)
-    st.markdown('<p style="color: #CCCCCC; font-size: 0.9rem;">Create a custom AI-generated image based on the story or your own prompt</p>', unsafe_allow_html=True)
-    
-    # Image generation input
-    img_col1, img_col2 = st.columns([3, 1])
-    
-    with img_col1:
-        custom_image_prompt = st.text_input(
-            "Custom image prompt",
-            placeholder="Optional: Enter custom instructions for the image...",
-            label_visibility="collapsed",
-            key="custom_image_prompt"
-        )
-    
-    with img_col2:
-        generate_image_btn = st.button("🎨 Generate", use_container_width=True, key="generate_image_btn")
-    
-    # Handle image generation
-    if generate_image_btn:
-        with st.spinner("🎨 Creating your image..."):
-            import time
-            import base64
-            unique_seed = int(time.time() * 1000)
-            current_culture = st.session_state.get('culture', culture)
-            culture_short = current_culture.split(' ', 1)[1] if ' ' in current_culture else current_culture
-            
-            # Use custom prompt if provided, otherwise generate story-relevant prompt
-            if custom_image_prompt and custom_image_prompt.strip():
-                img_prompt = custom_image_prompt.strip()
-            else:
-                random_style = random.choice(["watercolor", "oil painting", "digital art", "fantasy art", "illustration", "concept art"])
-                img_prompt = f"Beautiful {random_style} for story '{data['title']}', {culture_short} cultural theme, mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
-            
-            encoded_prompt = urllib.parse.quote(img_prompt)
-            
-            # Server-side fetch with timeout
-            generated_image_data = None
-            try:
-                img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=600&nologo=true&seed={unique_seed}"
-                response = requests.get(img_url, timeout=60)
-                if response.status_code == 200 and len(response.content) > 1000:
-                    generated_image_data = base64.b64encode(response.content).decode('utf-8')
-            except Exception as e:
-                pass  # Will use fallback
-            
-            # Fallback: create gradient if AI image failed
-            if not generated_image_data:
-                gradient_colors = {
-                    'Indian': [(255, 153, 51), (128, 0, 128)],
-                    'Japanese': [(255, 183, 197), (100, 149, 237)],
-                    'African': [(255, 140, 0), (139, 69, 19)],
-                    'Celtic': [(34, 139, 34), (75, 0, 130)],
-                    'Chinese': [(255, 0, 0), (255, 215, 0)],
-                    'Greek': [(30, 144, 255), (255, 255, 255)],
-                    'Egyptian': [(255, 215, 0), (139, 69, 19)],
-                    'Native American': [(210, 105, 30), (34, 139, 34)],
-                }
-                colors = gradient_colors.get(culture_short, [(50, 50, 100), (100, 50, 80)])
-                
-                fallback_img = Image.new('RGB', (800, 600))
-                for y in range(600):
-                    ratio = y / 600
-                    r = int(colors[0][0] * (1 - ratio) + colors[1][0] * ratio)
-                    g = int(colors[0][1] * (1 - ratio) + colors[1][1] * ratio)
-                    b = int(colors[0][2] * (1 - ratio) + colors[1][2] * ratio)
-                    for x in range(800):
-                        fallback_img.putpixel((x, y), (r, g, b))
-                
-                # Convert fallback to base64
-                buffer = BytesIO()
-                fallback_img.save(buffer, format='PNG')
-                generated_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            
-            st.session_state['generated_image'] = f"data:image/png;base64,{generated_image_data}"
-            st.rerun()
-    
-    
     # Media section header
-    st.markdown('<h3 class="media-header">🎬 Generate Media</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="media-header">Generate Media</h3>', unsafe_allow_html=True)
     
     # Voice selection for narration using radio buttons (truly non-editable)
-    st.markdown('<p style="color: #90EE90; font-weight: bold; margin-bottom: 5px;">🎤 Choose Narrator Voice</p>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #90EE90; font-weight: bold; margin-bottom: 5px;">Choose Narrator Voice:</p>', unsafe_allow_html=True)
     selected_voice_name = st.radio(
         "voice_selector",
         list(NARRATION_VOICES.keys()),
@@ -1427,16 +1381,17 @@ if st.session_state.get('story_data'):
     col1, col2 = st.columns(2)
     
     with col1:
-        audio_btn = st.button("🔊 Generate Audio", use_container_width=True, key="audio_btn")
+        audio_btn = st.button("Generate Audio", use_container_width=True, key="audio_btn")
     
     with col2:
-        video_btn = st.button("🎥 Generate Video", use_container_width=True, key="video_btn")
+        video_btn = st.button("Generate Video", use_container_width=True, key="video_btn")
     
     # Handle audio generation
     if audio_btn:
-        with st.spinner("🎵 Creating audio narration..."):
+        with st.spinner("Creating audio narration..."):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-                audio_path, error = generate_audio(data['story'], fp.name, voice_id=selected_voice)
+                story_lang = st.session_state.get('story_language', 'English')
+                audio_path, error = generate_audio(data['story'], fp.name, voice_id=selected_voice, language=story_lang)
                 if error:
                     st.error(f"Audio error: {error}")
                 else:
@@ -1445,9 +1400,10 @@ if st.session_state.get('story_data'):
     
     # Handle video generation
     if video_btn:
-        with st.spinner("🎬 Creating story video... This may take a minute."):
+        with st.spinner("Creating story video... This may take a minute."):
             with tempfile.TemporaryDirectory() as temp_dir:
-                video_path, srt_path, error = generate_video(data, temp_dir, voice_id=selected_voice)
+                story_lang = st.session_state.get('story_language', 'English')
+                video_path, srt_path, error = generate_video(data, temp_dir, voice_id=selected_voice, language=story_lang)
                 if error:
                     st.error(f"Video error: {error}")
                 else:
@@ -1483,22 +1439,22 @@ if st.session_state.get('story_data'):
     
     # Display audio player
     if st.session_state.get('audio_path') and os.path.exists(st.session_state['audio_path']):
-        st.markdown('<h4 class="section-header">🎧 Audio Narration</h4>', unsafe_allow_html=True)
+        st.markdown('<h4 class="section-header">Audio Narration</h4>', unsafe_allow_html=True)
         st.audio(st.session_state['audio_path'])
         with open(st.session_state['audio_path'], 'rb') as f:
-            st.download_button("⬇️ Download Audio", f.read(), "story_audio.mp3", "audio/mpeg", key="dl_audio")
+            st.download_button("Download Audio", f.read(), "story_audio.mp3", "audio/mpeg", key="dl_audio")
     
     # Display video player with caption toggle
     has_video = st.session_state.get('video_path') and os.path.exists(st.session_state['video_path'])
     has_captions = st.session_state.get('vtt_content') is not None
     
     if has_video:
-        st.markdown('<h4 class="section-header">🎥 Story Video</h4>', unsafe_allow_html=True)
+        st.markdown('<h4 class="section-header">Story Video</h4>', unsafe_allow_html=True)
         
         # Caption toggle with lime green styling - text and toggle on same line
         caption_col1, caption_col2 = st.columns([3, 1])
         with caption_col1:
-            st.markdown('<p style="color: #90EE90; font-weight: bold; margin: 0; padding-top: 5px;">📝 Show Captions</p>', unsafe_allow_html=True)
+            st.markdown('<p style="color: #90EE90; font-weight: bold; margin: 0; padding-top: 5px;">Show Captions</p>', unsafe_allow_html=True)
         with caption_col2:
             show_captions = st.toggle("", value=st.session_state.get('show_captions', True), key="caption_toggle", label_visibility="collapsed")
         st.session_state['show_captions'] = show_captions
@@ -1617,7 +1573,7 @@ if st.session_state.get('story_data'):
         # Download button
         with open(video_path, 'rb') as f:
             st.download_button(
-                "⬇️ Download Video",
+                "Download Video",
                 f.read(), 
                 "story_video.mp4", 
                 "video/mp4", 
@@ -1625,6 +1581,83 @@ if st.session_state.get('story_data'):
             )
     
     st.divider()
+    
+    # Generate Image section
+    st.markdown('<h3 class="media-header">Generate Image</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="color: #CCCCCC; font-size: 0.9rem;">Create a custom AI-generated image based on the story or your own prompt</p>', unsafe_allow_html=True)
+    
+    # Image generation input
+    img_col1, img_col2 = st.columns([3, 1])
+    
+    with img_col1:
+        custom_image_prompt = st.text_input(
+            "Custom image prompt",
+            placeholder="Optional: Enter custom instructions for the image...",
+            label_visibility="collapsed",
+            key="custom_image_prompt"
+        )
+    
+    with img_col2:
+        generate_image_btn = st.button("Generate", use_container_width=True, key="generate_image_btn")
+    
+    # Handle image generation
+    if generate_image_btn:
+        with st.spinner("Creating your image..."):
+            import time
+            import base64
+            unique_seed = int(time.time() * 1000)
+            current_culture = st.session_state.get('culture', culture)
+            culture_short = current_culture.split(' ', 1)[1] if ' ' in current_culture else current_culture
+            
+            # Use custom prompt if provided, otherwise generate story-relevant prompt
+            if custom_image_prompt and custom_image_prompt.strip():
+                img_prompt = custom_image_prompt.strip()
+            else:
+                random_style = random.choice(["watercolor", "oil painting", "digital art", "fantasy art", "illustration", "concept art"])
+                img_prompt = f"Beautiful {random_style} image for story '{data['title']}', on {culture_short} cultural theme, with mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
+            
+            encoded_prompt = urllib.parse.quote(img_prompt)
+            
+            # Server-side fetch with timeout
+            generated_image_data = None
+            try:
+                img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={unique_seed}"
+                response = requests.get(img_url, timeout=60)
+                if response.status_code == 200 and len(response.content) > 1000:
+                    generated_image_data = base64.b64encode(response.content).decode('utf-8')
+            except Exception as e:
+                pass  # Will use fallback
+            
+            # Fallback: create gradient if AI image failed
+            if not generated_image_data:
+                gradient_colors = {
+                    'Indian': [(255, 153, 51), (128, 0, 128)],
+                    'Japanese': [(255, 183, 197), (100, 149, 237)],
+                    'African': [(255, 140, 0), (139, 69, 19)],
+                    'Celtic': [(34, 139, 34), (75, 0, 130)],
+                    'Chinese': [(255, 0, 0), (255, 215, 0)],
+                    'Greek': [(30, 144, 255), (255, 255, 255)],
+                    'Egyptian': [(255, 215, 0), (139, 69, 19)],
+                    'Native American': [(210, 105, 30), (34, 139, 34)],
+                }
+                colors = gradient_colors.get(culture_short, [(50, 50, 100), (100, 50, 80)])
+                
+                fallback_img = Image.new('RGB', (800, 600))
+                for y in range(600):
+                    ratio = y / 600
+                    r = int(colors[0][0] * (1 - ratio) + colors[1][0] * ratio)
+                    g = int(colors[0][1] * (1 - ratio) + colors[1][1] * ratio)
+                    b = int(colors[0][2] * (1 - ratio) + colors[1][2] * ratio)
+                    for x in range(800):
+                        fallback_img.putpixel((x, y), (r, g, b))
+                
+                # Convert fallback to base64
+                buffer = BytesIO()
+                fallback_img.save(buffer, format='PNG')
+                generated_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            st.session_state['generated_image'] = f"data:image/png;base64,{generated_image_data}"
+            st.rerun()
 
     # Display generated image if available
     if st.session_state.get('generated_image'):
@@ -1637,7 +1670,7 @@ if st.session_state.get('story_data'):
     st.divider()
     
     # Dictionary Lookup Section
-    st.markdown('<h3 class="media-header">📖 Dictionary Lookup</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="media-header">Dictionary Lookup</h3>', unsafe_allow_html=True)
     st.markdown('<p style="color: #CCCCCC; font-size: 0.9rem;">Stuck somewhere? Look up the meaning of any word.</p>', unsafe_allow_html=True)
     
     # Dictionary input
@@ -1652,11 +1685,11 @@ if st.session_state.get('story_data'):
         )
     
     with dict_col2:
-        lookup_btn = st.button("🔍 Look Up", use_container_width=True, key="lookup_btn")
+        lookup_btn = st.button("Look Up", use_container_width=True, key="lookup_btn")
     
     # Handle dictionary lookup
     if lookup_btn and word_to_lookup:
-        with st.spinner(f"📖 Looking up '{word_to_lookup}'..."):
+        with st.spinner(f"Looking up '{word_to_lookup}'..."):
             try:
                 # Use Free Dictionary API
                 dict_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word_to_lookup.strip().lower()}"
@@ -1680,7 +1713,7 @@ if st.session_state.get('story_data'):
                         # Build definition display with CYAN color scheme
                         st.markdown(f"""
                         <div style="background: rgba(0, 50, 60, 0.8); border-radius: 12px; padding: 1.5rem; border-left: 4px solid #00CED1; margin-top: 1rem;">
-                            <h4 style="color: #00CED1; margin: 0 0 0.5rem 0;">📚 {word.capitalize()}</h4>
+                            <h4 style="color: #00CED1; margin: 0 0 0.5rem 0;">{word.capitalize()}</h4>
                             <p style="color: #00FFFF; font-size: 1.2rem; font-style: italic; margin: 0 0 1rem 0;">{phonetic if phonetic else ''}</p>
                         """, unsafe_allow_html=True)
                         
@@ -1719,7 +1752,7 @@ if st.session_state.get('story_data'):
     st.divider()
     
     # Translation section
-    st.markdown('<h3 class="media-header">🌐 Translate Story</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="media-header">Translate Story</h3>', unsafe_allow_html=True)
     st.markdown('<p style="color: #CCCCCC; font-size: 0.9rem;">Feel the essence as if at home! Translate the story into the language of your choice</p>', unsafe_allow_html=True)
     # Translation input
     trans_col1, trans_col2 = st.columns([3, 1])
@@ -1733,11 +1766,11 @@ if st.session_state.get('story_data'):
         )
     
     with trans_col2:
-        translate_btn = st.button("🔄 Translate", use_container_width=True, key="translate_btn")
+        translate_btn = st.button("Translate", use_container_width=True, key="translate_btn")
     
     # Handle translation
     if translate_btn and target_language:
-        with st.spinner(f"🌐 Translating to {target_language}..."):
+        with st.spinner(f"Translating to {target_language}..."):
             translated_text, error = translate_story(
                 data['story'],
                 data['title'],
@@ -1758,10 +1791,10 @@ if st.session_state.get('story_data'):
         trans_data = st.session_state['translated_story']
         trans_lang = st.session_state.get('translation_language', 'Translated')
         
-        st.markdown(f'<h4 class="section-header">📖 Story in {trans_lang}</h4>', unsafe_allow_html=True)
+        st.markdown(f'<h4 class="section-header">Story in {trans_lang}</h4>', unsafe_allow_html=True)
         
         # Translated title
-        st.markdown(f'<h3 style="color: #FFD700;">📜 {trans_data["title"]}</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="color: #FFD700;">{trans_data["title"]}</h3>', unsafe_allow_html=True)
         
         # Translated story
         st.markdown(f"""
@@ -1770,11 +1803,13 @@ if st.session_state.get('story_data'):
         </div>
         """, unsafe_allow_html=True)
         
-        # Translated moral
+        # Translated moral - use translated label for "Moral"
         if trans_data.get('moral'):
+            # Get the translated word for "Moral"
+            trans_moral_label = moral_translations.get(trans_lang.lower(), "Moral")
             st.markdown(f"""
             <div class="moral-box">
-                <strong>✨ {trans_lang} Moral:</strong> {trans_data['moral']}
+                <strong> {trans_moral_label}:</strong> {trans_data['moral']}
             </div>
             """, unsafe_allow_html=True)
 
@@ -1801,7 +1836,7 @@ else:
     
     st.markdown("""
     <div style="text-align: center; padding: 2rem 1rem;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📚✨🌍</div>
+        <div style="font-size: 4rem; margin-bottom: 1rem;">~ 📚 ~ ✨ ~ 🌍 ~</div>
         <h2 style="color: #FFD700; margin-bottom: 1rem;">Welcome to Ikshanam!</h2>
         <div style="color: #90EE90; font-size: 1.1rem; font-style: italic; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.8; text-align: justify;">
             <p>Remember the golden days, where we, as children, eagerly waited to meet our grandparents and nudge them to narrate wondrous, captivating stories as we listened to them with fascination?</p>
@@ -1852,7 +1887,7 @@ else:
                 <li>Select a <strong>Story Type</strong> (Mythology, Folk Tale, Legend, etc.)</li>
                 <li>Pick a <strong>Tone</strong> (Dramatic, Child-friendly, Mysterious, etc.)</li>
                 <li>Pick a <strong>Language</strong> (English, Bengali, Sanskrit, Italian, etc.)</li>
-                <li>Click <strong style="color: #90EE90;">🎬  Generate Story</strong></li>
+                <li>Click <strong style="color: #90EE90;">Generate Story</strong></li>
             </ol>
         </div>
     </div>
@@ -1861,9 +1896,9 @@ else:
     # Cultural icons
     st.markdown("""
     <div style="text-align: center; padding: 2rem 0;">
-        <p style="color: #888; font-size: 0.9rem; margin-bottom: 1rem;">Explore stories from these cultures:</p>
+        <p style="color: #888; font-size: 0.9rem; margin-bottom: 1rem;">A realm of cultural stories from around the world</p>
         <div style="font-size: 2rem; letter-spacing: 15px;">
-            🇮🇳 🇯🇵 🌍 ☘️ 🇨🇳 🏛️ 🏜️ 🦅
+            🌍 🇮🇳 🇯🇵 🇨🇳 🏛️ 🏜️ 🦅
         </div>
     </div>
     """, unsafe_allow_html=True)
