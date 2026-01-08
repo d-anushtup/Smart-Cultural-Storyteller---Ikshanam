@@ -4,7 +4,7 @@
 
 ![Ikshanam Banner](Ikshanam.png)
 
-**AI-Powered Tales from Around the World**
+**AI-Powered Tales from Around the World** 
 
 [![Streamlit App](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
