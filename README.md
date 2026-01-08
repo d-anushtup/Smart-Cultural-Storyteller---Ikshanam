@@ -77,14 +77,14 @@
 
 | Culture | Theme | Story Elements |
 |---------|-------|----------------|
-| 🇮🇳 Indian | Dharma, Karma, Wisdom | Village life, festivals, nature metaphors |
-| 🇯🇵 Japanese | Honor, Zen, Nature | Kami spirits, cherry blossoms, contemplation |
-| 🌍 African | Community, Ancestors | Anansi, trickster tales, proverbs |
-| ☘️ Celtic | Magic, Druids | Faeries, sacred groves, mystical lore |
-| 🇨🇳 Chinese | Dragons, Wisdom | Jade Emperor, immortals, filial piety |
-| 🏛️ Greek | Gods, Heroes | Olympus, epic quests, fate |
-| 🏜️ Arabian | Mystery, Magic | Djinn, desert wisdom, merchants |
-| 🦅 Native American | Harmony, Spirits | Animal guides, creation stories |
+| Indian | Dharma, Karma, Wisdom | Village life, festivals, nature metaphors |
+| Japanese | Honor, Zen, Nature | Kami spirits, cherry blossoms, contemplation |
+| African | Community, Ancestors | Anansi, trickster tales, proverbs |
+| Celtic | Magic, Druids | Faeries, sacred groves, mystical lore |
+| Chinese | Dragons, Wisdom | Jade Emperor, immortals, filial piety |
+| Greek | Gods, Heroes | Olympus, epic quests, fate |
+| Arabian | Mystery, Magic | Djinn, desert wisdom, merchants |
+| Native American | Harmony, Spirits | Animal guides, creation stories |
 
 ---
 
