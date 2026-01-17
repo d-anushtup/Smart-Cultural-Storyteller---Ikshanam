@@ -18,13 +18,13 @@
 
 ## Features
 
-- **Varied Cultural Traditions** — Indian, Japanese, African, Celtic, Chinese, Greek, Arabian, Native American & custom cultures
-- **Multiple Story Types** — Folk Tales, Mythology, Historical Stories, Moral Stories, Legends & more
-- **Customizable Tones** — Simple, Dramatic, Child-friendly, Mysterious, Humorous
-- **Multi-Language Support** — Generate stories in 15+ languages including Hindi, Bengali, Tamil, Spanish, French, Japanese, and more
-- **Neural Voice Narration** — High-quality AI voices using Microsoft Edge TTS
-- **Video Generation** — Automatically create narrated story videos with cultural themes
-- **Beautiful UI** — Immersive dark theme with cultural aesthetics
+- **Varied Cultural Traditions** - Indian, Japanese, African, Celtic, Chinese, Greek, Arabian, Native American & custom cultures
+- **Multiple Story Types** - Folk Tales, Mythology, Historical Stories, Moral Stories, Legends & more
+- **Customizable Tones** - Simple, Dramatic, Child-friendly, Mysterious, Humorous
+- **Multi-Language Support** - Generate stories in 15+ languages including Hindi, Bengali, Tamil, Spanish, French, Japanese, and more
+- **Neural Voice Narration** - High-quality AI voices using Microsoft Edge TTS
+- **Video Generation** - Automatically create narrated story videos with cultural themes
+- **Beautiful UI** - Immersive dark theme with cultural aesthetics
 
 ---
 
@@ -90,11 +90,11 @@
 
 ## Tech Stack
 
-- **Frontend**: [Streamlit](https://streamlit.io) — Beautiful, interactive web UI
-- **AI Engine**: [Groq](https://groq.com) — Ultra-fast LLM inference (Llama 3.3 70B)
-- **Text-to-Speech**: [Edge TTS](https://github.com/rany2/edge-tts) — Natural neural voices
-- **Video Generation**: [MoviePy](https://zulko.github.io/moviepy/) — Video composition
-- **Image Generation**: [Pollinations.ai](https://pollinations.ai/) — Free AI image generation
+- **Frontend**: [Streamlit](https://streamlit.io) - Beautiful, interactive web UI
+- **AI Engine**: [Groq](https://groq.com) - Ultra-fast LLM inference (Llama 3.3 70B)
+- **Text-to-Speech**: [Edge TTS](https://github.com/rany2/edge-tts) - Natural neural voices
+- **Video Generation**: [MoviePy](https://zulko.github.io/moviepy/) - Video composition
+- **Image Generation**: [Pollinations.ai](https://pollinations.ai/) - Free AI image generation
 
 ---
 
