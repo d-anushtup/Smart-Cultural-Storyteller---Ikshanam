@@ -156,8 +156,8 @@ This project is for educational purposes only.
 
 ## Acknowledgments
 
-- [Groq](https://groq.com) for lightning-fast AI inference
-- [Streamlit](https://streamlit.io) for the amazing framework
+- [Groq](https://groq.com) for AI inference
+- [Streamlit](https://streamlit.io) for the framework
 - [Microsoft Edge TTS](https://github.com/rany2/edge-tts) for neural voices
 - Inspired by storytelling traditions from around the world
 
