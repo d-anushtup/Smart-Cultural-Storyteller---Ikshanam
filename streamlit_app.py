@@ -479,11 +479,17 @@ else:
     story_language = language_choice
 
 
-# Check API key
-api_key = os.getenv("GROQ_API_KEY")
+# Check API key - supports both Streamlit Cloud (st.secrets) and local (.env)
+api_key = None
+try:
+    api_key = st.secrets["GROQ_API_KEY"]
+except (KeyError, FileNotFoundError):
+    api_key = os.getenv("GROQ_API_KEY")
+
 if not api_key:
-    st.warning("Please set GROQ_API_KEY environment variable to generate stories.")
-    st.code("export GROQ_API_KEY='your-key-here'", language="bash")
+    st.warning("Please set GROQ_API_KEY to generate stories.")
+    st.info("**Local:** Add `GROQ_API_KEY=your-key` to your `.env` file")
+    st.info("**Streamlit Cloud:** Go to App Settings → Secrets and add:\n```\nGROQ_API_KEY = \"your-key-here\"\n```")
     st.info("Get your free API key at: https://console.groq.com/keys")
     st.stop()
 
