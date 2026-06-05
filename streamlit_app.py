@@ -483,7 +483,7 @@ else:
 api_key = None
 try:
     api_key = st.secrets["GROQ_API_KEY"]
-except (KeyError, FileNotFoundError):
+except Exception:
     api_key = os.getenv("GROQ_API_KEY")
 
 if not api_key:
