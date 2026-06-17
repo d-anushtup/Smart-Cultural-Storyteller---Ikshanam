@@ -440,6 +440,107 @@ LANGUAGE_VOICES = {
     "english": ("en-US-JennyNeural", "en"),
 }
 
+# --- Artistic Background Generator (replaces Pollinations.ai) ---
+def generate_cultural_background(culture_name, width=800, height=400, title=""):
+    """Generate a beautiful artistic background image for a given culture using Pillow.
+    
+    Creates gradient backgrounds with radial glow, decorative borders,
+    subtle noise texture, and culture-specific color palettes.
+    """
+    from PIL import ImageDraw, ImageFilter, ImageFont
+    import math
+    
+    # Rich culture-specific color palettes: (top-left, top-right, bottom-left, bottom-right, accent)
+    CULTURE_PALETTES = {
+        'Indian':          ((255, 153, 51),  (220, 80, 20),   (128, 0, 128),   (80, 0, 100),    (255, 215, 0)),
+        'Japanese':        ((255, 183, 197), (200, 130, 170), (60, 80, 140),   (30, 40, 100),   (255, 255, 255)),
+        'African':         ((255, 160, 0),   (200, 100, 0),   (120, 50, 10),   (60, 25, 5),     (255, 220, 100)),
+        'Celtic':          ((30, 120, 50),   (20, 80, 40),    (60, 20, 100),   (30, 10, 70),    (180, 255, 180)),
+        'Chinese':         ((200, 20, 20),   (150, 10, 10),   (180, 150, 0),   (120, 100, 0),   (255, 215, 0)),
+        'Greek':           ((20, 100, 200),  (10, 60, 150),   (240, 240, 255), (180, 180, 220), (255, 255, 255)),
+        'Arabian':         ((80, 40, 120),   (50, 20, 80),    (200, 160, 50),  (150, 120, 30),  (255, 215, 0)),
+        'Native American': ((180, 80, 20),   (120, 50, 10),   (20, 100, 50),   (10, 60, 30),    (255, 200, 100)),
+        'Egyptian':        ((200, 170, 50),  (160, 130, 30),  (100, 50, 10),   (60, 30, 5),     (255, 215, 0)),
+    }
+    
+    palette = CULTURE_PALETTES.get(culture_name, ((40, 40, 80), (30, 30, 60), (80, 40, 60), (50, 20, 40), (200, 200, 255)))
+    tl, tr, bl, br, accent = palette
+    
+    # Create base image with 4-corner gradient
+    img = Image.new('RGB', (width, height))
+    pixels = img.load()
+    for y in range(height):
+        ry = y / max(height - 1, 1)
+        for x in range(width):
+            rx = x / max(width - 1, 1)
+            # Bilinear interpolation of 4 corners
+            top = tuple(int(tl[c] * (1 - rx) + tr[c] * rx) for c in range(3))
+            bot = tuple(int(bl[c] * (1 - rx) + br[c] * rx) for c in range(3))
+            color = tuple(int(top[c] * (1 - ry) + bot[c] * ry) for c in range(3))
+            pixels[x, y] = color
+    
+    # Add radial glow in center
+    glow = Image.new('RGB', (width, height), (0, 0, 0))
+    glow_pixels = glow.load()
+    cx, cy = width // 2, height // 2
+    max_dist = math.sqrt(cx ** 2 + cy ** 2)
+    for y in range(height):
+        for x in range(width):
+            dist = math.sqrt((x - cx) ** 2 + (y - cy) ** 2)
+            intensity = max(0, 1 - (dist / max_dist)) ** 2
+            glow_pixels[x, y] = (
+                int(accent[0] * intensity * 0.3),
+                int(accent[1] * intensity * 0.3),
+                int(accent[2] * intensity * 0.3),
+            )
+    
+    # Blend glow onto base
+    from PIL import ImageChops
+    img = ImageChops.add(img, glow)
+    
+    # Add subtle noise texture
+    import random as _rnd
+    noise_img = Image.new('RGB', (width, height))
+    noise_pixels = noise_img.load()
+    for y in range(height):
+        for x in range(width):
+            n = _rnd.randint(-15, 15)
+            noise_pixels[x, y] = (n, n, n)
+    img = ImageChops.add(img, noise_img)
+    
+    # Add decorative border frame
+    draw = ImageDraw.Draw(img)
+    border_color = tuple(min(255, c + 60) for c in accent)
+    # Outer border
+    draw.rectangle([8, 8, width - 9, height - 9], outline=(*border_color, 100), width=2)
+    # Inner border with slight offset
+    inner_color = tuple(min(255, c + 30) for c in accent)
+    draw.rectangle([16, 16, width - 17, height - 17], outline=(*inner_color, 60), width=1)
+    
+    # Add corner ornaments (small diamond shapes)
+    ornament_size = 6
+    corners = [(20, 20), (width - 20, 20), (20, height - 20), (width - 20, height - 20)]
+    for cx_o, cy_o in corners:
+        draw.polygon([
+            (cx_o, cy_o - ornament_size),
+            (cx_o + ornament_size, cy_o),
+            (cx_o, cy_o + ornament_size),
+            (cx_o - ornament_size, cy_o),
+        ], fill=border_color)
+    
+    # Add soft vignette (darken edges)
+    vignette = Image.new('L', (width, height), 255)
+    vig_draw = ImageDraw.Draw(vignette)
+    for i in range(40):
+        opacity = int(255 * (1 - i / 40) * 0.4)
+        vig_draw.rectangle([i, i, width - i - 1, height - i - 1], outline=opacity)
+    img = Image.composite(img, Image.new('RGB', (width, height), (0, 0, 0)), vignette)
+    
+    # Apply slight blur for a painterly feel
+    img = img.filter(ImageFilter.GaussianBlur(radius=1))
+    
+    return img
+
 # Sidebar for inputs
 st.sidebar.header("Create Your Story")
 
@@ -496,6 +597,109 @@ if not api_key:
 if not GROQ_AVAILABLE:
     st.error("Groq package not installed. Run: pip install groq")
     st.stop()
+
+# --- Prompt Relevance Guardrail ---
+# Off-topic keywords/phrases that are clearly unrelated to cultural storytelling
+_OFF_TOPIC_KEYWORDS = [
+    # Sports
+    "football score", "cricket score", "basketball score", "baseball score",
+    "soccer score", "match result", "who won the match", "ipl score",
+    "world cup score", "premier league", "nba score", "nfl score",
+    "yesterday's game", "today's game", "live score",
+    # Finance / Stocks
+    "stock price", "share price", "market cap", "bitcoin price",
+    "crypto price", "nifty", "sensex", "nasdaq", "dow jones",
+    # Weather
+    "weather today", "weather forecast", "temperature today",
+    "will it rain", "weather in",
+    # News / Current events
+    "latest news", "breaking news", "headlines today",
+    "election result", "who is the president", "who is the prime minister",
+    # Tech support / Code
+    "write code", "write a program", "fix my code", "debug this",
+    "python code", "javascript code", "html code", "sql query",
+    "how to install", "stack overflow",
+    # Math / Homework
+    "solve this equation", "calculate", "what is the formula",
+    "math problem", "integral of", "derivative of",
+    # Personal assistant
+    "set an alarm", "remind me", "send an email", "call ",
+    "book a flight", "order food", "pizza near me",
+    "directions to", "navigate to", "open google",
+    # Recipes (non-cultural)
+    "recipe for", "how to cook", "calories in",
+    # Generic chatbot
+    "who are you", "what can you do", "are you alive",
+    "tell me a joke", "sing a song",
+]
+
+def is_prompt_on_topic(prompt_text):
+    """Check whether the custom prompt is relevant to cultural storytelling.
+    
+    Returns:
+        (bool, str): (is_on_topic, reason_if_off_topic)
+    """
+    if not prompt_text or not prompt_text.strip():
+        return True, ""  # Empty prompt is fine — the app uses default story settings
+    
+    prompt_lower = prompt_text.lower().strip()
+    
+    # --- Fast path: keyword-based check ---
+    for keyword in _OFF_TOPIC_KEYWORDS:
+        if keyword in prompt_lower:
+            return False, (
+                f"Your prompt appears to be about **\"{keyword}\"**, which is outside "
+                "Ikshanam's scope. This app is a **cultural storytelling** platform — "
+                "try prompts related to myths, legends, folk tales, cultural traditions, "
+                "or historical stories instead!"
+            )
+    
+    # --- Slow path: LLM-based relevance classifier ---
+    try:
+        client = Groq(api_key=api_key)
+        classification = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a strict content-relevance classifier for a CULTURAL STORYTELLING app called Ikshanam. "
+                        "The app generates folk tales, myths, legends, moral stories, and historical narratives "
+                        "rooted in world cultures (Indian, Japanese, African, Celtic, Chinese, Greek, Arabian, Native American, etc.).\n\n"
+                        "Your ONLY job: decide if the user's prompt is RELEVANT to cultural storytelling.\n\n"
+                        "RELEVANT examples (respond ON_TOPIC):\n"
+                        "- 'Tell me about a brave warrior princess' → ON_TOPIC\n"
+                        "- 'A story involving dragons and wisdom' → ON_TOPIC\n"
+                        "- 'Something about harvest festivals' → ON_TOPIC\n"
+                        "- 'A tale of two rival kingdoms' → ON_TOPIC\n"
+                        "- 'Story about karma and reincarnation' → ON_TOPIC\n\n"
+                        "IRRELEVANT examples (respond OFF_TOPIC):\n"
+                        "- 'What is the weather today?' → OFF_TOPIC\n"
+                        "- 'Tell me yesterday's football score' → OFF_TOPIC\n"
+                        "- 'Write Python code for sorting' → OFF_TOPIC\n"
+                        "- 'What is 2+2?' → OFF_TOPIC\n"
+                        "- 'Who won the election?' → OFF_TOPIC\n"
+                        "- 'Explain quantum physics' → OFF_TOPIC\n\n"
+                        "Respond with EXACTLY one word: ON_TOPIC or OFF_TOPIC. Nothing else."
+                    )
+                },
+                {"role": "user", "content": prompt_text}
+            ],
+            temperature=0.0,
+            max_tokens=10,
+        )
+        verdict = classification.choices[0].message.content.strip().upper()
+        if "OFF_TOPIC" in verdict:
+            return False, (
+                "Your prompt doesn't seem related to **cultural storytelling**. "
+                "Ikshanam is designed to craft folk tales, myths, legends, and cultural narratives. "
+                "Try something like *\"A story about a clever fox in an ancient forest\"* or "
+                "*\"Tell me a legend about a sacred river\"*!"
+            )
+    except Exception:
+        pass  # If the classifier fails, allow the prompt through gracefully
+    
+    return True, ""
 
 # Generate story function using GROQ
 def generate_story(culture_name, story_type, tone, language="English", custom_prompt=""):
@@ -949,53 +1153,9 @@ def generate_video(story_data, output_dir, voice_id=None, language=None):
         # Create a single background image for the whole video
         single_img_path = temp_dir / "background.png"
         
-        # Use the title and culture to create a visual prompt
-        import time
-        scene_seed = int(time.time() * 1000)
-        
-        # Create visual prompt for video, based on the story title and culture
-        visual_prompt = f"Artistic and Cinematic illustration for '{title}'. Should be of {culture_short} cultural style, with beautiful scenery, dramatic lighting, fantasy art, painterly style, no text, 4k quality"
-        encoded_prompt = urllib.parse.quote(visual_prompt)
-        
-        # Fetch AI-generated image from Pollinations.ai
-        img_loaded = False
-        try:
-            img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={scene_seed}"
-            response = requests.get(img_url, timeout=60)
-            
-            if response.status_code == 200 and len(response.content) > 1000:
-                # Load AI image
-                ai_img = Image.open(BytesIO(response.content)).convert('RGB')
-                ai_img = ai_img.resize((854, 480), Image.Resampling.LANCZOS)
-                ai_img.save(str(single_img_path), quality=95)
-                img_loaded = True
-        except Exception as e:
-            pass  # Will use fallback
-        
-        # Fallback: create beautiful gradient background if AI image failed
-        if not img_loaded:
-            gradient_colors = {
-                'Indian': [(255, 153, 51), (128, 0, 128)],
-                'Japanese': [(255, 183, 197), (100, 149, 237)],
-                'African': [(255, 140, 0), (139, 69, 19)],
-                'Celtic': [(34, 139, 34), (75, 0, 130)],
-                'Chinese': [(255, 0, 0), (255, 215, 0)],
-                'Greek': [(30, 144, 255), (255, 255, 255)],
-                'Egyptian': [(255, 215, 0), (139, 69, 19)],
-                'Native American': [(210, 105, 30), (34, 139, 34)],
-            }
-            colors = gradient_colors.get(culture_short, [(50, 50, 100), (100, 50, 80)])
-            
-            fallback_img = Image.new('RGB', (854, 480))
-            for y in range(480):
-                ratio = y / 480
-                r = int(colors[0][0] * (1 - ratio) + colors[1][0] * ratio)
-                g = int(colors[0][1] * (1 - ratio) + colors[1][1] * ratio)
-                b = int(colors[0][2] * (1 - ratio) + colors[1][2] * ratio)
-                for x in range(854):
-                    fallback_img.putpixel((x, y), (r, g, b))
-            
-            fallback_img.save(str(single_img_path), quality=95)
+        # Generate artistic background image for video
+        bg_img = generate_cultural_background(culture_short, width=854, height=480, title=title)
+        bg_img.save(str(single_img_path), quality=95)
         
         # Use the same image for all scenes
         for i in range(len(scenes)):
@@ -1164,7 +1324,19 @@ if 'show_captions' not in st.session_state:
 
 # Main generate button
 if st.sidebar.button("Generate Story", type="primary", use_container_width=True):
-    with st.spinner("Weaving your cultural tale..."):
+    # --- Guardrail: check if custom prompt is on-topic ---
+    prompt_is_relevant, off_topic_reason = is_prompt_on_topic(custom_prompt)
+    if not prompt_is_relevant:
+        st.warning("WARNING!! " + off_topic_reason)
+        st.info(
+            "**Tip:** Ikshanam is your gateway to the world's cultural heritage. "
+            "Try prompts like:\n"
+            "- *\"A tale of a wise old turtle\"*\n"
+            "- *\"Story about a festival of lights\"*\n"
+            "- *\"A warrior who learned humility\"*"
+        )
+    else:
+      with st.spinner("Weaving your cultural tale..."):
         # Always generate story in English first
         story_text, error = generate_story(culture, story_type, tone, "English", custom_prompt)
         
@@ -1235,55 +1407,15 @@ if st.sidebar.button("Generate Story", type="primary", use_container_width=True)
             st.session_state['custom_image_prompt'] = ""  # Clear custom image prompt field
             st.session_state['generated_image'] = None  # Clear generated image
             
-            # Auto-generate background image with unique seed and timeout
-            import time
+            # Auto-generate artistic background image
             import base64
-            unique_seed = int(time.time() * 1000)
             culture_short = culture.split(' ', 1)[1] if ' ' in culture else culture
-            random_style = random.choice(["watercolor", "oil painting", "digital art", "fantasy art", "illustration", "concept art"])
-            img_prompt = f"Beautiful {random_style} image for story '{parsed_story['title']}', on {culture_short} cultural theme, with mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
-            encoded_prompt = urllib.parse.quote(img_prompt)
-            
-            # Server-side fetch with timeout
-            bg_image_data = None
-            try:
-                img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={unique_seed}"
-                response = requests.get(img_url, timeout=60)
-                if response.status_code == 200 and len(response.content) > 1000:
-                    # Convert to base64 for reliable display
-                    bg_image_data = base64.b64encode(response.content).decode('utf-8')
-            except Exception as e:
-                pass  # Will use fallback
-            
-            # Fallback: create gradient if AI image failed
-            if not bg_image_data:
-                gradient_colors = {
-                    'Indian': [(255, 153, 51), (128, 0, 128)],
-                    'Japanese': [(255, 183, 197), (100, 149, 237)],
-                    'African': [(255, 140, 0), (139, 69, 19)],
-                    'Celtic': [(34, 139, 34), (75, 0, 130)],
-                    'Chinese': [(255, 0, 0), (255, 215, 0)],
-                    'Greek': [(30, 144, 255), (255, 255, 255)],
-                    'Egyptian': [(255, 215, 0), (139, 69, 19)],
-                    'Native American': [(210, 105, 30), (34, 139, 34)],
-                }
-                colors = gradient_colors.get(culture_short, [(50, 50, 100), (100, 50, 80)])
-                
-                fallback_img = Image.new('RGB', (800, 400))
-                for y in range(400):
-                    ratio = y / 400
-                    r = int(colors[0][0] * (1 - ratio) + colors[1][0] * ratio)
-                    g = int(colors[0][1] * (1 - ratio) + colors[1][1] * ratio)
-                    b = int(colors[0][2] * (1 - ratio) + colors[1][2] * ratio)
-                    for x in range(800):
-                        fallback_img.putpixel((x, y), (r, g, b))
-                
-                # Convert fallback to base64
-                buffer = BytesIO()
-                fallback_img.save(buffer, format='PNG')
-                bg_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            
+            bg_img = generate_cultural_background(culture_short, width=800, height=400, title=parsed_story.get('title', ''))
+            buffer = BytesIO()
+            bg_img.save(buffer, format='PNG')
+            bg_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
             st.session_state['bg_image_url'] = f"data:image/png;base64,{bg_image_data}"
+      # (end of the else block from the on-topic guardrail)
 
 # Display story if available, otherwise show welcome page
 if st.session_state.get('story_data'):
@@ -1615,53 +1747,11 @@ if st.session_state.get('story_data'):
             current_culture = st.session_state.get('culture', culture)
             culture_short = current_culture.split(' ', 1)[1] if ' ' in current_culture else current_culture
             
-            # Use custom prompt if provided, otherwise generate story-relevant prompt
-            if custom_image_prompt and custom_image_prompt.strip():
-                img_prompt = custom_image_prompt.strip()
-            else:
-                random_style = random.choice(["watercolor", "oil painting", "digital art", "fantasy art", "illustration", "concept art"])
-                img_prompt = f"Beautiful {random_style} image for story '{data['title']}', on {culture_short} cultural theme, with mystical atmosphere, cinematic lighting, 4k quality, no text, unique composition"
-            
-            encoded_prompt = urllib.parse.quote(img_prompt)
-            
-            # Server-side fetch with timeout
-            generated_image_data = None
-            try:
-                img_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={unique_seed}"
-                response = requests.get(img_url, timeout=60)
-                if response.status_code == 200 and len(response.content) > 1000:
-                    generated_image_data = base64.b64encode(response.content).decode('utf-8')
-            except Exception as e:
-                pass  # Will use fallback
-            
-            # Fallback: create gradient if AI image failed
-            if not generated_image_data:
-                gradient_colors = {
-                    'Indian': [(255, 153, 51), (128, 0, 128)],
-                    'Japanese': [(255, 183, 197), (100, 149, 237)],
-                    'African': [(255, 140, 0), (139, 69, 19)],
-                    'Celtic': [(34, 139, 34), (75, 0, 130)],
-                    'Chinese': [(255, 0, 0), (255, 215, 0)],
-                    'Greek': [(30, 144, 255), (255, 255, 255)],
-                    'Egyptian': [(255, 215, 0), (139, 69, 19)],
-                    'Native American': [(210, 105, 30), (34, 139, 34)],
-                }
-                colors = gradient_colors.get(culture_short, [(50, 50, 100), (100, 50, 80)])
-                
-                fallback_img = Image.new('RGB', (800, 600))
-                for y in range(600):
-                    ratio = y / 600
-                    r = int(colors[0][0] * (1 - ratio) + colors[1][0] * ratio)
-                    g = int(colors[0][1] * (1 - ratio) + colors[1][1] * ratio)
-                    b = int(colors[0][2] * (1 - ratio) + colors[1][2] * ratio)
-                    for x in range(800):
-                        fallback_img.putpixel((x, y), (r, g, b))
-                
-                # Convert fallback to base64
-                buffer = BytesIO()
-                fallback_img.save(buffer, format='PNG')
-                generated_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            
+            # Generate artistic cultural background image
+            gen_img = generate_cultural_background(culture_short, width=800, height=400, title=data.get('title', ''))
+            buffer = BytesIO()
+            gen_img.save(buffer, format='PNG')
+            generated_image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
             st.session_state['generated_image'] = f"data:image/png;base64,{generated_image_data}"
             st.rerun()
 
